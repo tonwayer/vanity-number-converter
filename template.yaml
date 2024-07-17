@@ -1,0 +1,30 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  VanityNumberFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      FunctionName: vanity-number-converter
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      CodeUri: .
+      Environment:
+        Variables:
+          TABLE_NAME: VanityNumbers
+      Policies:
+        - AmazonDynamoDBFullAccess
+
+  VanityNumberTable:
+    Type: 'AWS::DynamoDB::Table'
+    Properties:
+      TableName: VanityNumbers
+      AttributeDefinitions:
+        - AttributeName: PhoneNumber
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PhoneNumber
+          KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5

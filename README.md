@@ -2,9 +2,6 @@
 
 This project converts phone numbers to vanity numbers using AWS Lambda and DynamoDB. It includes a deployment package built with AWS SAM.
 
-## Directory Structure
-
-
 ## Setup and Deployment
 
 ### Prerequisites

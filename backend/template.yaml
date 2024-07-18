@@ -2,6 +2,12 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
+  VanityNumberApi:
+    Type: 'AWS::Serverless::Api'
+    Properties:
+      Name: VanityNumberApi
+      StageName: Prod
+
   VanityNumberFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -14,6 +20,13 @@ Resources:
           TABLE_NAME: VanityNumbers
       Policies:
         - AmazonDynamoDBFullAccess
+      Events:
+        VanityNumberAPI:
+          Type: Api
+          Properties:
+            Path: /vanitynumbers
+            Method: get
+            RestApiId: !Ref VanityNumberApi
 
   VanityNumberTable:
     Type: 'AWS::DynamoDB::Table'
@@ -28,3 +41,8 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
+
+Outputs:
+  VanityNumberApiUrl:
+    Description: "URL for the API"
+    Value: !Sub "https://${VanityNumberApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/vanitynumbers"

@@ -5,6 +5,8 @@ from collections import defaultdict
 from botocore.exceptions import ClientError
 
 TABLE_NAME = "VanityNumbers"
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('VanityNumbers')
 
 digit_to_letters = {
     '2': 'ABC', '3': 'DEF', '4': 'GHI', '5': 'JKL', 
@@ -32,57 +34,75 @@ def score_vanity_number(vanity_number):
     return score
 
 def lambda_handler(event, context):
-    try:
+    if event.get('httpMethod') == 'GET':
+        try:
+            response = table.scan(Limit=5)
+            items = response.get('Items', [])
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+                },
+                'body': json.dumps(items)
+            }
+        except ClientError as e:
+            print(e.response['Error']['Message'])
+            return {
+                'statusCode': 500,
+                'body': json.dumps('Error retrieving data from DynamoDB')
+            }
+    else:
+        try:
 
-        phone_number = event['phone_number']
-        combinations = get_combinations(phone_number)
-        scored_combinations = defaultdict(list)
+            phone_number = event['phone_number']
+            combinations = get_combinations(phone_number)
+            scored_combinations = defaultdict(list)
 
-        for comb in combinations:
-            vanity_number = ''.join(comb)
-            score = score_vanity_number(vanity_number)
-            scored_combinations[score].append(vanity_number)
+            for comb in combinations:
+                vanity_number = ''.join(comb)
+                score = score_vanity_number(vanity_number)
+                scored_combinations[score].append(vanity_number)
 
-        # Sort vanity numbers by their scores in descending order
-        sorted_vanity_numbers = sorted(scored_combinations.items(), key=lambda x: x[0], reverse=True)
-        
-        best_vanity_numbers = []
-        for score, vanity_list in sorted_vanity_numbers:
-            for vn in vanity_list:
-                if len(best_vanity_numbers) < 5:
-                    best_vanity_numbers.append(vn)
-                else:
+            # Sort vanity numbers by their scores in descending order
+            sorted_vanity_numbers = sorted(scored_combinations.items(), key=lambda x: x[0], reverse=True)
+            
+            best_vanity_numbers = []
+            for score, vanity_list in sorted_vanity_numbers:
+                for vn in vanity_list:
+                    if len(best_vanity_numbers) < 5:
+                        best_vanity_numbers.append(vn)
+                    else:
+                        break
+                if len(best_vanity_numbers) >= 5:
                     break
-            if len(best_vanity_numbers) >= 5:
-                break
 
-        # Save to DynamoDB
-        dynamodb = boto3.resource('dynamodb')
-        table = dynamodb.Table(TABLE_NAME)
-        table.put_item(
-            Item={
-                'PhoneNumber': phone_number,
-                'VanityNumbers': best_vanity_numbers
+            # Save to DynamoDB
+            table.put_item(
+                Item={
+                    'PhoneNumber': phone_number,
+                    'VanityNumbers': best_vanity_numbers
+                }
+            )
+
+            return {
+                'statusCode': 200,
+                'body': {
+                    'PhoneNumber': phone_number,
+                    'VanityNumbers': best_vanity_numbers
+                }
             }
-        )
 
-        return {
-            'statusCode': 200,
-            'body': {
-                'PhoneNumber': phone_number,
-                'VanityNumbers': best_vanity_numbers
+        except ClientError as e:
+            print(e.response['Error']['Message'])
+            return {
+                'statusCode': 500,
+                'body': json.dumps('Error saving to DynamoDB')
             }
-        }
-
-    except ClientError as e:
-        print(e.response['Error']['Message'])
-        return {
-            'statusCode': 500,
-            'body': json.dumps('Error saving to DynamoDB')
-        }
-    except Exception as e:
-        print(str(e))
-        return {
-            'statusCode': 500,
-            'body': json.dumps('An unknown error occurred')
-        }
+        except Exception as e:
+            print(str(e))
+            return {
+                'statusCode': 500,
+                'body': json.dumps('An unknown error occurred')
+            }

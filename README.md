@@ -1,61 +1,119 @@
-# Vanity Number Converter
+# Vanity Numbers Converter
 
-This project converts phone numbers to vanity numbers using AWS Lambda and DynamoDB. It includes a deployment package built with AWS SAM.
+## Project Overview
 
-## Setup and Deployment
+This project is a full-stack application that retrieves and displays the last 5 vanity numbers from callers. It consists of a backend AWS Lambda function written in Python, deployed using AWS SAM, and a frontend React application.
+
+## Project Directory Structure
+
+```plaintext
+my-project/
+│
+├── backend/
+│   ├── app.py
+│   ├── requirements.txt
+│   └── template.yaml
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   │   └── VanityNumbers.js
+│   │   ├── App.js
+│   │   ├── index.js
+│   │   └── ...
+│   ├── package.json
+│   ├── package-lock.json
+│   └── ...
+│
+├── README.md
+└── .gitignore
+```
+
+## Backend Setup
 
 ### Prerequisites
 
-- AWS CLI installed and configured
+- AWS CLI configured with your credentials
 - AWS SAM CLI installed
-- Python 3.8 installed
+- An S3 bucket for packaging the Lambda function code
 
-### Build and Deploy
+### Steps
 
-1. **Build your SAM application**
+1. **Navigate to the `backend/` directory**:
 
-    ```bash
-    sam build
+    ```sh
+    cd backend/
     ```
 
-2. **Deploy your SAM application**
+2. **Install dependencies**:
 
-    ```bash
-    sam deploy --guided
+    ```sh
+    pip install -r requirements.txt
     ```
 
-    Follow the prompts to configure your deployment:
-    - **Stack Name**: vanity-number-converter
-    - **AWS Region**: us-east-1
-    - **Confirm changes before deploy**: Y
-    - **Allow SAM CLI to create IAM roles**: Y
-    - **Save arguments to samconfig.toml**: Y
+3. **Package the SAM application**:
 
-### Import Amazon Connect Contact Flow
-
-1. **Sign in to Amazon Connect**
-
-2. **Go to Routing -> Contact Flows**
-
-3. **Create a new contact flow and import the provided JSON configuration**
-
-4. **Save and Publish the contact flow**
-
-## Test
-
-1. Go to the AWS Lambda console.
-2. Create a test event with the following JSON:
-
-    ```json
-    {
-      "Details": {
-        "ContactData": {
-          "CustomerEndpoint": {
-            "Address": "2345678901"
-          }
-        }
-      }
-    }
+    ```sh
+    sam package --template-file template.yaml --output-template-file packaged.yaml --s3-bucket YOUR_S3_BUCKET_NAME
     ```
 
-3. Run the test and verify the output.
+    Replace `YOUR_S3_BUCKET_NAME` with the name of an existing S3 bucket.
+
+4. **Deploy the SAM application**:
+
+    ```sh
+    sam deploy --template-file packaged.yaml --stack-name VanityNumberStack --capabilities CAPABILITY_IAM
+    ```
+
+5. **Note the API Gateway endpoint URL** from the output of the deployment. This URL will be used in the frontend application.
+
+## Frontend Setup
+
+### Prerequisites
+
+- Node.js and npm installed
+
+### Steps
+
+1. **Navigate to the `frontend/` directory**:
+
+    ```sh
+    cd frontend/
+    ```
+
+2. **Install dependencies**:
+
+    ```sh
+    npm install
+    ```
+
+3. **Update the API Gateway URL** in `src/components/VanityNumbers.js`:
+
+    ```javascript
+    const response = await fetch('YOUR_API_GATEWAY_URL');
+    ```
+
+    Replace `YOUR_API_GATEWAY_URL` with the actual URL from the backend deployment step.
+
+4. **Run the React application**:
+
+    ```sh
+    npm start
+    ```
+
+    The application will be available at `http://localhost:3000`.
+
+## Project Components
+
+### Backend
+
+- **`app.py`**: Contains the Lambda function code to fetch the last 5 vanity numbers from DynamoDB.
+- **`requirements.txt`**: Lists Python dependencies for the Lambda function.
+- **`template.yaml`**: AWS SAM template that defines the Lambda function and DynamoDB table.
+
+### Frontend
+
+- **`src/components/VanityNumbers.js`**: React component that fetches and displays the last 5 vanity numbers.
+- **`App.js`**: Main React application component.
+- **`index.js`**: Entry point for the React application.

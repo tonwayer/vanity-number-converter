@@ -2,12 +2,14 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Resources:
+  # API Gateway for exposing the Lambda function
   VanityNumberApi:
     Type: 'AWS::Serverless::Api'
     Properties:
       Name: VanityNumberApi
       StageName: Prod
 
+  # Lambda function to convert phone numbers to vanity numbers
   VanityNumberFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
@@ -28,6 +30,7 @@ Resources:
             Method: get
             RestApiId: !Ref VanityNumberApi
 
+  # DynamoDB table to store the phone numbers and vanity numbers
   VanityNumberTable:
     Type: 'AWS::DynamoDB::Table'
     Properties:
@@ -43,6 +46,7 @@ Resources:
         WriteCapacityUnits: 5
 
 Outputs:
+  # Output the URL for the API
   VanityNumberApiUrl:
     Description: "URL for the API"
     Value: !Sub "https://${VanityNumberApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/vanitynumbers"

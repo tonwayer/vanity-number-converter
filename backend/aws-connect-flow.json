@@ -1,0 +1,108 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "c22eb549-267c-4792-b2a7-1ef60a564eee",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": 40,
+      "y": 40
+    },
+    "ActionMetadata": {
+      "5a45b00d-274e-42ea-a2f7-df2d1133c5bf": {
+        "position": {
+          "x": 496,
+          "y": 368
+        }
+      },
+      "de35abcf-27ef-4267-9a52-c892300fb14e": {
+        "position": {
+          "x": 989.6,
+          "y": 144.8
+        }
+      },
+      "c22eb549-267c-4792-b2a7-1ef60a564eee": {
+        "position": {
+          "x": 188.8,
+          "y": 74.4
+        },
+        "parameters": {
+          "LambdaFunctionARN": {
+            "displayName": "vanity-number-converter"
+          }
+        },
+        "dynamicMetadata": {}
+      },
+      "f9f20d2d-b155-4b4f-842f-5a44fdba86d6": {
+        "position": {
+          "x": 514.4,
+          "y": 16
+        }
+      }
+    },
+    "Annotations": [],
+    "name": "vanity-number-converter-2",
+    "description": "",
+    "type": "contactFlow",
+    "status": "published",
+    "hash": {}
+  },
+  "Actions": [
+    {
+      "Parameters": {
+        "Text": "Please try again later."
+      },
+      "Identifier": "5a45b00d-274e-42ea-a2f7-df2d1133c5bf",
+      "Type": "MessageParticipant",
+      "Transitions": {
+        "NextAction": "de35abcf-27ef-4267-9a52-c892300fb14e",
+        "Errors": [
+          {
+            "NextAction": "de35abcf-27ef-4267-9a52-c892300fb14e",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {},
+      "Identifier": "de35abcf-27ef-4267-9a52-c892300fb14e",
+      "Type": "DisconnectParticipant",
+      "Transitions": {}
+    },
+    {
+      "Parameters": {
+        "LambdaFunctionARN": "arn:aws:lambda:us-east-1:381492113608:function:vanity-number-converter",
+        "InvocationTimeLimitSeconds": "3",
+        "ResponseValidation": {
+          "ResponseType": "STRING_MAP"
+        }
+      },
+      "Identifier": "c22eb549-267c-4792-b2a7-1ef60a564eee",
+      "Type": "InvokeLambdaFunction",
+      "Transitions": {
+        "NextAction": "f9f20d2d-b155-4b4f-842f-5a44fdba86d6",
+        "Errors": [
+          {
+            "NextAction": "5a45b00d-274e-42ea-a2f7-df2d1133c5bf",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "Text": "Your vanity numbers are: {VanityNumber1}, {VanityNumber2}, {VanityNumber3}."
+      },
+      "Identifier": "f9f20d2d-b155-4b4f-842f-5a44fdba86d6",
+      "Type": "MessageParticipant",
+      "Transitions": {
+        "NextAction": "de35abcf-27ef-4267-9a52-c892300fb14e",
+        "Errors": [
+          {
+            "NextAction": "5a45b00d-274e-42ea-a2f7-df2d1133c5bf",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -66,7 +66,7 @@ For the phone number `18005551234`, possible vanity numbers might be `1-800-CALL
 3. Ensure the Lambda function ARN is correctly referenced in the contact flow.
 
 ## Architecture Diagram
-![Architecture Diagram](path/to/your/architecture-diagram.png)
+![Architecture Diagram](./architecture-diagram.png)
 
 ## Writing and Documentation
 ### Reasons for Implementation

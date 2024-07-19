@@ -1,4 +1,3 @@
-// src/VanityNumbers.tsx
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -15,11 +14,17 @@ const VanityNumbers: React.FC = () => {
   useEffect(() => {
     const fetchVanityNumbers = async () => {
       try {
-        const response = await axios.get('https://6l7trs2h53.execute-api.us-east-1.amazonaws.com/Prod/vanitynumbers');
-        setVanityNumbers(response.data);
-        setLoading(false);
+        const apiUrl = process.env.REACT_APP_API_URL;
+        if (apiUrl) {
+          const response = await axios.get(apiUrl);
+          setVanityNumbers(response.data);
+          setLoading(false);
+        } else {
+          setError("apiUrl to fetch vanity numbers is need to be set");
+          setLoading(false);
+        }
       } catch (err) {
-        setError("Error");
+        setError("Error fetching vanity numbers");
         setLoading(false);
       }
     };
